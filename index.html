@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Text Processor</title>
+    <link rel="stylesheet" type="text/css" href="styles1.css">
+    <script>
+        async function sendText() {
+            let inputText = document.getElementById("inputText").value;
+            let fileInput = document.getElementById("fileInput").files[0];
+            
+            if (fileInput) {
+                let formData = new FormData();
+                formData.append("file", fileInput);
+    
+                let response = await fetch("http://127.0.0.1:5000/upload", {
+                    method: "POST",
+                    body: formData
+                });
+    
+                let result = await response.json();
+                showResult(result);
+            } else {
+                let response = await fetch("http://127.0.0.1:5000/process", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ text: inputText })
+                });
+    
+                let result = await response.json();
+                showResult(result);
+            }
+        }
+    
+        function showResult(result) {
+            if (result.error) {
+                document.getElementById("result").innerText = result.error;
+                document.getElementById("wordList").innerText = "";
+            } else {
+                document.getElementById("result").innerText = result.output;
+                document.getElementById("wordList").innerText = result.words.join(", ");
+            }
+        }
+    </script>    
+</head>
+<body>
+    <div class="banner">Keyword Identification And Summarization in a text</div>
+    <div class="out-container">
+        <div class="in-container">
+            <div class="left">
+                <h2>Enter Text or Upload a Document</h2>
+                <textarea id="inputText" rows="10" cols="80"></textarea><br>
+                <input type="file" id="fileInput" accept=".pdf,.docx"><br>
+                <button onclick="sendText()">Submit</button>    
+            </div>
+            <div class="right">
+                <h3><img src="key.jpg" alt="icon" class="icon">Keywords:</h3>
+                <p id="wordList"></p>
+            </div>    
+        </div>
+    <h3><img src="sum.jpg" alt="icon" class="icon">Summarized Text:</h3>
+    <p id="result"></p>
+    </div>
+</body>
+</html>
